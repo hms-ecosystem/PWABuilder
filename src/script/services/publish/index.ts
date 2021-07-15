@@ -10,8 +10,13 @@ import {
   createWindowsPackageOptionsFromManifest,
   generateWindowsPackage,
 } from './windows-publish';
+import {
+  createHuaweiPackageOptionsFromForm,
+  createHuaweiPackageOptionsFromManifest,
+  generateHuaweiPackage,
+} from './huawei-publish';
 
-export type Platform = 'windows' | 'android' | 'samsung';
+export type platform = 'windows' | 'android' | 'huawei' | 'samsung';
 
 export type PackageInfo = {
   blob: Blob | null;
@@ -28,6 +33,8 @@ export async function generatePackage(
       return await tryGenerateWindowsPackage(form);
     case 'android':
       return await tryGenerateAndroidPackage(form, signingFile);
+    case 'huawei':
+      return await tryGenerateHuaweiPackage(form, signingFile);
     case 'samsung':
       console.log('samsung');
       return null;
@@ -158,5 +165,56 @@ async function tryGenerateAndroidPackage(form?: HTMLFormElement, signingFile?: s
     }
   } catch (err) {
     throw new Error(`Error generating android package: ${err}`);
+  }
+}
+
+async function tryGenerateHuaweiPackage(form?: HTMLFormElement, signingFile?: string): Promise<PackageInfo | null> {
+  try {
+    if (form) {
+      const androidOptions = await createHuaweiPackageOptionsFromForm(
+        form,
+        signingFile
+      );
+
+      if (!androidOptions) {
+        return null;
+      }
+
+      const blob = await generateHuaweiPackage(androidOptions, form);
+      return {
+        blob: blob || null,
+        type: 'store',
+      };
+    } else {
+      // No form. Try creating from manifest.
+      try {
+        const androidOptions = await createHuaweiPackageOptionsFromManifest();
+        const testBlob = await generateHuaweiPackage(androidOptions);
+
+        return {
+          blob: testBlob || null,
+          type: 'test',
+        };
+      } catch (err) {
+        // Oh no, looks like we dont have the manifest in memory
+        // Lets try to grab it
+        const localManifest = await grabBackupManifest();
+        if (!localManifest) {
+          return null;
+        }
+
+        const androidOptions = await createHuaweiPackageOptionsFromManifest(
+          localManifest
+        );
+
+        const testBlob = await generateHuaweiPackage(androidOptions);
+        return {
+          blob: testBlob || null,
+          type: 'test',
+        };
+      }
+    }
+  } catch (err) {
+    throw new Error(`Error generating android package: ${err.stack}`);
   }
 }

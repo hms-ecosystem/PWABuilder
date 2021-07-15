@@ -10,6 +10,7 @@ import '../components/loading-button';
 import '../components/windows-form';
 import '../components/android-form';
 import '../components/hover-tooltip';
+import '../components/huawei-form';
 import { Router } from '@vaadin/router';
 
 import {
@@ -48,6 +49,7 @@ export class AppPublish extends LitElement {
 
   @state() open_windows_options = false;
   @state() open_android_options = false;
+  @state() open_huawei_options = false;
   @state() open_samsung_modal = false;
 
   @state() generating = false;
@@ -424,6 +426,7 @@ export class AppPublish extends LitElement {
         if (maniCheck === false || baseIcon === false || validURL === false) {
           this.generating = false;
           this.open_android_options = false;
+          this.open_huawei_options = false;
 
           let err = '';
 
@@ -464,11 +467,13 @@ export class AppPublish extends LitElement {
 
       this.generating = false;
       this.open_android_options = false;
+      this.open_huawei_options = false;
       this.open_windows_options = false;
     } catch (err) {
       console.error(err);
       this.generating = false;
       this.open_android_options = false;
+      this.open_huawei_options = false;
       this.open_windows_options = false;
 
       this.showAlertModal(err as Error, type);
@@ -500,6 +505,10 @@ export class AppPublish extends LitElement {
 
   showAndroidOptionsModal() {
     this.open_android_options = true;
+  }
+
+  showHuaweiOptionsModal() {
+    this.open_huawei_options = true;
   }
 
   showSamsungModal() {
@@ -549,6 +558,15 @@ export class AppPublish extends LitElement {
                   >
                 `
               : null}
+            ${platform.title.toLowerCase() === 'huawei'
+              ? html`
+                  <app-button
+                    class="navigation"
+                    @click="${() => this.showHuaweiOptionsModal()}"
+                    >Store Package</app-button
+                  >
+                `
+              : null}
             ${platform.title.toLowerCase() === 'samsung'
               ? html`
                   <app-button
@@ -590,6 +608,7 @@ export class AppPublish extends LitElement {
   storeOptionsCancel() {
     this.open_windows_options = false;
     this.open_android_options = false;
+    this.open_huawei_options = false;
     this.open_samsung_modal = false;
   }
 
@@ -695,6 +714,21 @@ export class AppPublish extends LitElement {
         ></android-form>
       </app-modal>
 
+      <!-- huawei options modal -->
+      <app-modal
+        id="huawei-options-modal"
+        title="Huawei AppGallery Options"
+        body="Customize your AppGallery Android package below!"
+        ?open="${this.open_huawei_options === true}"
+        @app-modal-close="${() => this.storeOptionsCancel()}"
+      >
+        <huawei-form
+          slot="modal-form"
+          .generating=${this.generating}
+          @init-huawei-gen="${(ev: CustomEvent) => this.generate('huawei', ev.detail.form, ev.detail.signingFile)}"
+        ></huawei-form>
+      </app-modal>
+
       <!-- samsung modal -->
       <app-modal
         id="samsung-options-modal"
@@ -764,7 +798,7 @@ export class AppPublish extends LitElement {
   }
 }
 
-type platform = 'windows' | 'android' | 'samsung';
+type platform = 'windows' | 'android' | 'samsung' | 'huawei';
 
 interface ICardData {
   title: string;
@@ -787,6 +821,13 @@ const platforms: ICardData[] = [
       'Publish your PWA to the Google Play Store to make your app more discoverable for Android users.',
     isActionCard: true,
     icon: '/assets/android_icon.svg',
+  },
+  {
+    title: 'Huawei',
+    description:
+      'Publish your PWA to the AppGallery to make your app more discoverable for Android users.',
+    isActionCard: true,
+    icon: '/assets/huawei_icon.svg'
   },
   {
     title: 'Samsung',

@@ -8,6 +8,7 @@ export const env = {
   windowsPackageGeneratorUrl:
     'https://pwabuilder-win-chromium-platform.centralus.cloudapp.azure.com/msix/generatezip',
   androidPackageGeneratorUrl: 'https://pwabuilder-cloudapk.azurewebsites.net',
+  huaweiPackageGeneratorUrl: 'https://api.pwabuilder-ag.com',
   imageGeneratorUrl:
     'https://appimagegenerator-prod.azurewebsites.net/api/image',
   safeUrlFetcher:

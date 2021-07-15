@@ -59,6 +59,22 @@ export interface AndroidApkOptions {
   startUrl: string;
   themeColor: string;
   webManifestUrl: string;
+  /** 
+    Huawei AppGallery related parameters
+  **/
+  HMSKits: [];
+  hmsAdsSplashId: string;
+  hmsAdsTopBannerId: string;
+  hmsAdsBottomBannerId: string;
+  allowlist: string;
+  agcs: string;
+  aGConnectServicesJSON: object;
+  ads_id: object;
+  whitelist: string;
+  clientId: string;
+  clientKey: string;
+  appId: string;
+  apk: string;
 };
 
 /**
